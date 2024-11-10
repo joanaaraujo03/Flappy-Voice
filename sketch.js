@@ -28,20 +28,16 @@ let instructionsVisible = true; // instruções começam visiveis
 function setup() {
   createCanvas(800, 600);  // Modificado para ter o dobro da largura
   
-  // Configuração do microfone
-  mic = new p5.AudioIn(); //inicia mic
-  mic.start(); //começa a capturar o som
-  
-  // gerar obstáculos
+  // Gerar obstáculos
   setInterval(spawnObstacle, 2000); // Gera um novo obstáculo a cada 2 segundos
   
-  // botão "Jogar", começa escondido 
+  // Botão "Jogar", começa escondido 
   playButton = createButton('Jogar');
   playButton.position(width / 2 - 40, height / 2 + 20);
   playButton.size(80, 40);
   playButton.mousePressed(startGame);
   
-  //  botão "Jogar de novo"
+  // Botão "Jogar de novo"
   tryAgainButton = createButton('Jogar de novo');
   tryAgainButton.position(width / 2 - 60, height / 2 + 50);
   tryAgainButton.size(120, 40);
@@ -94,7 +90,7 @@ function draw() {
   // Exibir o nível do microfone no canto superior esquerdo
   fill(0);
   textSize(12); // Definir o tamanho do texto para o nível do mic
- text('Mic Level: ' + nf(volume, 1, 3), 70, 30); // Posiciona no canto superior esquerdo
+  text('Mic Level: ' + nf(volume, 1, 3), 70, 30); // Posiciona no canto superior esquerdo
   
   // Usar o volume para controlar a bola
   let verticalForce = map(volume, 0, 1, 0, lift);  // Mapear o volume 
@@ -212,20 +208,20 @@ function increaseScore() {
     if (obstacles[i].x + obstacleWidth < ballX - ballSize / 2) {
       score += 10; // Aumentar a pontuação
       passedObstacles++; // Aumentar o número de obstáculos passados
-      obstacles.splice(i, 1); // Remover o obstáculo após ser ultrapassado
-      
-      // Garantir que o jogo termine quando atingir 100 pontos
-      if (score >= 100) {
-        gameOver = true; // Finalizar o jogo
-      }
+      obstacles.splice(i, 1); // Remover o obstáculo
     }
   }
 }
 
-// Iniciar o jogo ao pressionar o botão "Jogar"
+// Começar o jogo ao pressionar o botão "Jogar"
 function startGame() {
-  instructionsVisible = false; // Ocultar as instruções
-  playButton.hide(); // Esconder o botão "Jogar"
+  // Iniciar o microfone
+  mic = new p5.AudioIn();
+  mic.start();
+  
+  // Esconder as instruções e o botão "Jogar"
+  instructionsVisible = false;
+  playButton.hide();
 }
 
 // Reiniciar o jogo ao pressionar o botão "Tentar de novo"
