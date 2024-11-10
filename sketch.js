@@ -27,7 +27,7 @@ let playButton;  // Botão para iniciar o jogo
 let instructionsVisible = true; // instruções começam visiveis
 
 function setup() {
-  createCanvas(400, 600); 
+  createCanvas(800, 600);  // Modificado para ter o dobro da largura
   
   // Configuração do microfone
   mic = new p5.AudioIn(); //inicia mic
@@ -232,10 +232,12 @@ function startGame() {
 
 // Reiniciar o jogo
 function resetGame() {
-  gameOver = false; // reiniciar o estado de game over
-  score = 0; // Reiniciar a pontuação
-  passedObstacles = 0; // reiniciar obstáculos passados
-  obstacles = []; // Limpar obstáculos
-  tryAgainButton.hide(); // Esconder o botão "Tentar de novo"
-  instructionsVisible = true; // Mostrar a tela de instruções
+  gameOver = false;
+  score = 0;
+  obstacles = [];
+  passedObstacles = 0;
+  tryAgainButton.hide();
+  playButton.show();
+  instructionsVisible = true; // Voltar às instruções
 }
+
