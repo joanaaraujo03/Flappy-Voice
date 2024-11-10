@@ -30,11 +30,7 @@ function setup() {
   createCanvas(800, 600);  // Modificado para ter o dobro da largura
   
   // Configuração do microfone
-  mic = new p5.AudioIn(); //inicia mic
-  mic.start(); //começa a capturar o som
-  
-  // gerar obstáculos
-  setInterval(spawnObstacle, 2000); // Gera um novo obstáculo a cada 2 segundos
+  mic = new p5.AudioIn();
   
   // botão "Jogar", começa escondido 
   playButton = createButton('Jogar');
@@ -50,6 +46,20 @@ function setup() {
   tryAgainButton.hide();
 }
 
+function startGame() {
+  instructionsVisible = false; // Esconder a tela de instruções
+  playButton.hide(); // Esconder o botão "Jogar"
+  
+  // Ativar o AudioContext quando o jogador clicar em "Jogar"
+  mic.start(); // Iniciar o microfone após o clique
+  
+  gameOver = false; // Reiniciar o estado do jogo
+  score = 0; // reiniciar a pontuação
+  obstacles = []; // Limpar os obstáculos
+  passedObstacles = 0; // reniciar obstáculos passados
+}
+
+// Agora a função draw irá continuar conforme o esperado
 function draw() {
   if (instructionsVisible) {
     // Exibir  instruções
@@ -111,133 +121,105 @@ function draw() {
   increaseScore();
 }
 
-// Função para desenhar o fundo em movimento
+//FUNÇÃO DO FUNDO
 function drawBackground() {
-  // Mover o fundo para a esquerda
-  bgOffset -= bgSpeed;
-
-  // Loop do fundo quando sair da tela
-  if (bgOffset <= -width) {
-    bgOffset = 0;
+  bgOffset += bgSpeed; // A cada frame, move o fundo
+  if (bgOffset > width) {
+    bgOffset = 0; // Se o fundo ultrapassar a largura da tela, reinicia
   }
-
-  // Desenhar duas cópias do fundo para criar o efeito de repetição
-  fill(135, 206, 235); // Cor do céu
-  rect(bgOffset, 0, width, height);
-  rect(bgOffset + width, 0, width, height);
+  
+  // Desenha o fundo movendo a imagem de fundo
+  background(0);
+  fill(100, 150, 255);
+  rect(bgOffset, 0, width, height); // Fundo azul que se move
 }
 
-// Atualizar a posição da bola
+//FUNÇÃO PARA ATUALIZAR A BOLA
 function updateBall(verticalForce) {
-  // Aplicar a força vertical (controlo de movimento para cima e para baixo)
-  ballVelocityY += gravity;  // Força da gravidade
+  ballVelocityY += gravity; // Aplica a gravidade na bola
+  ballY += ballVelocityY + verticalForce; // Atualiza a posição Y da bola com a velocidade e a força do som
 
-  // Aplicar a força vertical do som para um movimento de subida mais controlado
-  ballVelocityY += verticalForce;
-  
-  // Suavizar a subida  para evitar movimentos abruptos e descontrolados
-  ballVelocityY = constrain(ballVelocityY, -15, 15); // Limitar a velocidade máxima
-  
-  // Atualizar a posição vertical da bola
-  ballY += ballVelocityY;
-  
-  // Prevenir que a bola saia da tela verticalmente
+  // Limites da tela
   if (ballY > height - ballSize / 2) {
     ballY = height - ballSize / 2;
-    ballVelocityY = 0;
+    ballVelocityY = 0; // A bola para ao atingir o chão
   } else if (ballY < ballSize / 2) {
     ballY = ballSize / 2;
-    ballVelocityY = 0;
+    ballVelocityY = 0; // Impede que a bola saia da tela para cima
   }
 }
 
-// Exibir a bola na tela
+//FUNÇÃO PARA EXIBIR A BOLA
 function displayBall() {
-  fill(255, 0, 0); // Cor da bola 
-  ellipse(ballX, ballY, ballSize, ballSize);
+  fill(255, 0, 0); // Cor da bola
+  noStroke();
+  ellipse(ballX, ballY, ballSize); // Desenha a bola
 }
 
-// Função para gerar um novo obstáculo
-function spawnObstacle() {
-  let obstacleHeight = random(100, height - gapHeight - 100); // Altura do obstáculo
-  obstacles.push({
-    x: width, // Começar fora da tela à direita
-    topHeight: obstacleHeight, // Altura do obstáculo superior
-    bottomHeight: height - obstacleHeight - gapHeight // Altura do obstáculo inferior
-  });
-}
-
-// Atualizar a posição dos obstáculos
+//FUNÇÃO DOS OBSTÁCULOS
 function updateObstacles() {
+  if (frameCount % 60 === 0) { // Cria um novo obstáculo a cada segundo
+    let gapStart = random(100, height - gapHeight - 100); // Define onde a lacuna entre obstáculos vai começar
+    let topHeight = gapStart;
+    let bottomHeight = height - gapStart - gapHeight;
+    
+    obstacles.push({x: width, topHeight, bottomHeight}); // Adiciona o obstáculo no array
+  }
+
+  // Move os obstáculos
   for (let i = obstacles.length - 1; i >= 0; i--) {
     obstacles[i].x -= obstacleSpeed;
-
-    // Remover obstáculos que saem da tela
-    if (obstacles[i].x + obstacleWidth < 0) {
+    
+    // Remove obstáculos que saíram da tela
+    if (obstacles[i].x < 0) {
       obstacles.splice(i, 1);
     }
   }
 }
 
-// Exibir os obstáculos na tela
+//FUNÇÃO PARA EXIBIR OS OBSTÁCULOS
 function displayObstacles() {
+  fill(0, 255, 0); // Cor dos obstáculos
+  
+  // Desenha os obstáculos
   for (let i = 0; i < obstacles.length; i++) {
-    // Desenhar o obstáculo superior
-    fill(0, 255, 0); // Cor verde
-    rect(obstacles[i].x, 0, obstacleWidth, obstacles[i].topHeight);
-    
-    // Desenhar o obstáculo inferior
-    rect(obstacles[i].x, height - obstacles[i].bottomHeight, obstacleWidth, obstacles[i].bottomHeight);
+    rect(obstacles[i].x, 0, obstacleWidth, obstacles[i].topHeight); // Parte superior
+    rect(obstacles[i].x, height - obstacles[i].bottomHeight, obstacleWidth, obstacles[i].bottomHeight); // Parte inferior
   }
 }
 
-// Verificar colisões entre a bola e os obstáculos
+//FUNÇÃO PARA VERIFICAR COLISÕES
 function checkCollisions() {
   for (let i = 0; i < obstacles.length; i++) {
-    // Verificar se a bola está dentro da faixa horizontal do obstáculo
+    // Colisão com a parte superior do obstáculo
     if (ballX + ballSize / 2 > obstacles[i].x && ballX - ballSize / 2 < obstacles[i].x + obstacleWidth) {
-      // Verificar se a bola está dentro da faixa vertical do obstáculo
       if (ballY - ballSize / 2 < obstacles[i].topHeight || ballY + ballSize / 2 > height - obstacles[i].bottomHeight) {
-        gameOver = true; // Se houver colisão, termina o jogo
+        gameOver = true;
       }
     }
   }
 }
 
-// Aumentar a pontuação quando a bola passa um obstáculo
+//FUNÇÃO PARA AUMENTAR A PONTUAÇÃO
 function increaseScore() {
   for (let i = obstacles.length - 1; i >= 0; i--) {
     if (obstacles[i].x + obstacleWidth < ballX - ballSize / 2) {
-      score += 10; // Aumentar a pontuação
-      passedObstacles++; // Aumentar o número de obstáculos passados
-      obstacles.splice(i, 1); // Remover o obstáculo após ser passado
-      
-      // Verificar se o jogador alcançou 50 pontos
-      if (passedObstacles >= 5) {
-        gameOver = true; // Terminar o jogo
-      }
+      passedObstacles++;
+      score++;
+      obstacles.splice(i, 1);
     }
   }
 }
 
-// Iniciar o jogo
-function startGame() {
-  instructionsVisible = false; // Esconder a tela de instruções
-  playButton.hide(); // Esconder o botão "Jogar"
-  gameOver = false; // Reiniciar o estado do jogo
-  score = 0; // reiniciar a pontuação
-  obstacles = []; // Limpar os obstáculos
-  passedObstacles = 0; // reniciar obstáculos passados
-}
-
-// Reiniciar o jogo
+//FUNÇÃO PARA REINICIAR O JOGO
 function resetGame() {
   gameOver = false;
   score = 0;
   obstacles = [];
   passedObstacles = 0;
+  ballY = 200;
+  ballVelocityY = -5;
+  mic.start();
   tryAgainButton.hide();
-  playButton.show();
-  instructionsVisible = true; // Voltar às instruções
+  instructionsVisible = true; // Mostrar instruções novamente
 }
-
