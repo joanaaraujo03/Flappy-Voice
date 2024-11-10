@@ -226,21 +226,14 @@ function increaseScore() {
 function startGame() {
   instructionsVisible = false; // Ocultar as instruções
   playButton.hide(); // Esconder o botão "Jogar"
-  gameOver = false; // Reiniciar o jogo
-  score = 0; // Reiniciar a pontuação
-  obstacles = []; // Limpar obstáculos
-  ballY = height / 2; // Reiniciar a posição da bola
-  ballVelocityY = 0; // Reiniciar a velocidade da bola
 }
 
 // Reiniciar o jogo ao pressionar o botão "Tentar de novo"
 function resetGame() {
-  score = 0; // Reiniciar a pontuação
-  obstacles = []; // Limpar obstáculos
-  ballY = height / 2; // Reiniciar a posição da bola
-  ballVelocityY = 0; // Reiniciar a velocidade da bola
-  gameOver = false; // Reiniciar o estado do jogo
+  obstacles = []; // Limpar os obstáculos
+  score = 0; // Resetar a pontuação
+  passedObstacles = 0; // Resetar o contador de obstáculos passados
+  gameOver = false; // Resetar o estado do jogo
   tryAgainButton.hide(); // Esconder o botão "Tentar de novo"
-  playButton.show(); // Exibir o botão "Jogar"
-  instructionsVisible = true; // Exibir instruções novamente
+  instructionsVisible = true; // Mostrar novamente as instruções
 }
